@@ -67,6 +67,7 @@ open class Pool<T> {
      */
     public func draw() throws -> T {
 
+        print("ThreadCheck - inside pool.draw()")
         // when count reaches zero, calls to the semaphore will block
         guard self.semaphore.wait(timeout: .distantFuture) == .success else {
             throw PoolError.drawTimeOut
@@ -75,6 +76,7 @@ open class Pool<T> {
         return try self.queue.sync {
 
             guard self.elements.isEmpty, self.elementCount < self.maxElementCount else {
+                print("ThreadCheck - inside self.elements.isEmpty \(self.elements.isEmpty) self.elementCount \(self.elementCount) self.maxElementCount \(self.maxElementCount)")
 
                 // Use an existing element
                 return self.elements.removeFirst()
@@ -84,6 +86,7 @@ open class Pool<T> {
             do {
                 let element = try self.factory()
                 self.elementCount += 1
+                print("ThreadCheck - inside Create a new element \(element). self.elementCount \(self.elementCount)")
 
                 return element
 
@@ -100,6 +103,7 @@ open class Pool<T> {
      - parameter element: The element to put back in the pool.
      */
     public func release(_ element: T, completion: (() -> Void)? = nil) {
+        print("ThreadCheck - inside release")
 
         self.queue.async {
             self.elements.append(element)
